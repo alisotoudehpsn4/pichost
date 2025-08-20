@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PicHost - Simple Image Hosting</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .upload-section {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 10px;
+            padding: 60px 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: #f8f9ff;
+        }
+
+        .upload-area:hover,
+        .upload-area.dragover {
+            background: #667eea;
+            color: white;
+            border-color: #764ba2;
+        }
+
+        .upload-area i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .upload-area h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .upload-area p {
+            font-size: 1rem;
+            opacity: 0.7;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s ease;
+            margin: 10px 5px;
+        }
+
+        .btn:hover {
+            background: #5a67d8;
+        }
+
+        .btn-secondary {
+            background: #718096;
+        }
+
+        .btn-secondary:hover {
+            background: #4a5568;
+        }
+
+        .slots-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .slots-section h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .image-slots {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .image-slot {
+            border: 2px dashed #cbd5e0;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: #f7fafc;
+        }
+
+        .image-slot.has-image {
+            border-color: #667eea;
+            background: white;
+        }
+
+        .image-slot:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .slot-name {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .slot-image {
+            width: 100%;
+            max-height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .slot-placeholder {
+            color: #a0aec0;
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .slot-url {
+            background: #edf2f7;
+            border: 1px solid #e2e8f0;
+            border-radius: 5px;
+            padding: 8px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            margin-bottom: 10px;
+            word-break: break-all;
+            color: #4a5568;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .image-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .image-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .image-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .image-card-content {
+            padding: 15px;
+        }
+
+        .image-url {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 5px;
+            padding: 8px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            word-break: break-all;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #667eea;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            color: white;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .upload-section {
+                padding: 20px;
+            }
+
+            .upload-area {
+                padding: 40px 15px;
+            }
+
+            .gallery {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-cloud-upload-alt"></i> PicHost</h1>
+            <p>Simple, fast, and free image hosting</p>
+        </header>
+
+        <section class="slots-section">
+            <h2><i class="fas fa-image"></i> Banner Hosting</h2>
+            <div class="image-slots" id="imageSlots">
+                <!-- Banner slot will be generated here -->
+            </div>
+        </section>
+
+        <section class="upload-section">
+            <div class="upload-area" id="uploadArea">
+                <i class="fas fa-images"></i>
+                <h3>Drop your banner here</h3>
+                <p>Upload your banner image - it will always be available at banner.png</p>
+                <button class="btn" onclick="document.getElementById('fileInput').click()">
+                    <i class="fas fa-folder-open"></i> Choose Files
+                </button>
+            </div>
+            <input type="file" id="fileInput" accept="image/*" onchange="handleFileInputChange(this)">
+            
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </section>
+
+        <div class="gallery" id="gallery" style="display: none;">
+            <!-- Legacy gallery - hidden in slot mode -->
+        </div>
+
+        <footer class="footer">
+            <p>Made with <i class="fas fa-heart" style="color: #ff6b6b;"></i> for simple image hosting</p>
+        </footer>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const imageSlotsContainer = document.getElementById('imageSlots');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+
+        // Single banner slot with stable URL
+        const bannerSlot = { id: 'banner', name: 'banner.png', description: 'Website Banner' };
+
+        let bannerImage = JSON.parse(localStorage.getItem('bannerImage') || 'null');
+
+        // Initialize banner display
+        initializeBanner();
+
+        // Click to upload
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // Drag and drop functionality
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            handleFiles(files);
+        });
+
+        // File input change handler
+        function handleFileInputChange(input) {
+            handleFiles(input.files);
+            input.value = ''; // Clear the input to allow same file upload again
+        }
+
+        function initializeBanner() {
+            imageSlotsContainer.innerHTML = '';
+            
+            const slotElement = document.createElement('div');
+            slotElement.className = 'image-slot';
+            slotElement.id = 'banner-slot';
+            
+            if (bannerImage) {
+                slotElement.classList.add('has-image');
+            }
+            
+            const baseUrl = `${window.location.origin}${window.location.pathname}`;
+            const permanentUrl = `${baseUrl}${bannerSlot.name}`;
+            
+            slotElement.innerHTML = `
+                <div class="slot-name">${bannerSlot.description}</div>
+                ${bannerImage ? 
+                    `<img src="${bannerImage.data}" alt="${bannerSlot.name}" class="slot-image">` :
+                    `<div class="slot-placeholder"><i class="fas fa-image"></i></div>`
+                }
+                <div class="slot-url">${permanentUrl}</div>
+                <button class="btn" onclick="copyToClipboard('${permanentUrl}')">
+                    <i class="fas fa-copy"></i> Copy Link
+                </button>
+                ${bannerImage ? 
+                    `<button class="btn btn-secondary" onclick="clearBanner()">
+                        <i class="fas fa-trash"></i> Clear Banner
+                    </button>` : 
+                    ''
+                }
+            `;
+            
+            imageSlotsContainer.appendChild(slotElement);
+        }
+
+        function handleFiles(files) {
+            if (files.length === 0) return;
+            
+            const file = files[0]; // Only handle first file
+            if (!file.type.startsWith('image/')) {
+                alert('Please upload an image file');
+                return;
+            }
+
+            progressBar.style.display = 'block';
+            progressFill.style.width = '50%';
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const imageData = {
+                    data: e.target.result,
+                    uploadDate: new Date().toISOString(),
+                    originalName: file.name,
+                    size: file.size
+                };
+                
+                // Store banner image
+                bannerImage = imageData;
+                localStorage.setItem('bannerImage', JSON.stringify(bannerImage));
+                
+                // Refresh banner display
+                initializeBanner();
+                
+                progressFill.style.width = '100%';
+                
+                setTimeout(() => {
+                    progressBar.style.display = 'none';
+                    progressFill.style.width = '0%';
+                }, 1000);
+            };
+            
+            reader.readAsDataURL(file);
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                // Show a temporary success message
+                const button = event.target.closest('button');
+                const originalContent = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                button.style.background = '#48bb78';
+                
+                setTimeout(() => {
+                    button.innerHTML = originalContent;
+                    button.style.background = '#667eea';
+                }, 2000);
+            });
+        }
+
+        function clearBanner() {
+            if (confirm('Are you sure you want to clear the banner?')) {
+                bannerImage = null;
+                localStorage.removeItem('bannerImage');
+                initializeBanner();
+            }
+        }
+    </script>
+</body>
+</html>
