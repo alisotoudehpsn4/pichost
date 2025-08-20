@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banner</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #f0f0f0;
+        }
+        .banner-container {
+            text-align: center;
+        }
+        .banner-image {
+            max-width: 100%;
+            height: auto;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .no-banner {
+            color: #666;
+            font-family: Arial, sans-serif;
+            font-size: 18px;
+        }
+        .upload-link {
+            margin-top: 20px;
+        }
+        .upload-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-family: Arial, sans-serif;
+        }
+        .upload-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="banner-container">
+        <div id="bannerContent">
+            <!-- Banner will be loaded here -->
+        </div>
+    </div>
+
+    <script>
+        function loadBanner() {
+            const bannerImage = JSON.parse(localStorage.getItem('bannerImage') || 'null');
+            const bannerContent = document.getElementById('bannerContent');
+            
+            if (bannerImage && bannerImage.data) {
+                bannerContent.innerHTML = `<img src="${bannerImage.data}" alt="Banner" class="banner-image">`;
+            } else {
+                bannerContent.innerHTML = `
+                    <div class="no-banner">
+                        <p>No banner uploaded yet</p>
+                        <div class="upload-link">
+                            <a href="index.html">← Upload a banner</a>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Load banner on page load
+        loadBanner();
+
+        // Listen for storage changes (when banner is updated from main site)
+        window.addEventListener('storage', loadBanner);
+        
+        // Also check periodically for changes within the same tab
+        setInterval(loadBanner, 1000);
+    </script>
+</body>
+</html>
