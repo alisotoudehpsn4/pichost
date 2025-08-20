@@ -379,7 +379,10 @@
                     <i class="fas fa-copy"></i> Copy Link
                 </button>
                 ${bannerImage ? 
-                    `<button class="btn btn-secondary" onclick="clearBanner()">
+                    `<button class="btn" onclick="downloadBanner()">
+                        <i class="fas fa-download"></i> Download banner.png
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearBanner()">
                         <i class="fas fa-trash"></i> Clear Banner
                     </button>` : 
                     ''
@@ -441,6 +444,37 @@
                     button.style.background = '#667eea';
                 }, 2000);
             });
+        }
+
+        function downloadBanner() {
+            if (!bannerImage) return;
+            
+            // Convert data URL to blob
+            const byteString = atob(bannerImage.data.split(',')[1]);
+            const mimeString = bannerImage.data.split(',')[0].split(':')[1].split(';')[0];
+            const arrayBuffer = new ArrayBuffer(byteString.length);
+            const uint8Array = new Uint8Array(arrayBuffer);
+            
+            for (let i = 0; i < byteString.length; i++) {
+                uint8Array[i] = byteString.charCodeAt(i);
+            }
+            
+            const blob = new Blob([arrayBuffer], { type: mimeString });
+            
+            // Create download link
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'banner.png';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            // Show instructions
+            setTimeout(() => {
+                alert('1. Upload the downloaded banner.png file to your GitHub repository root\n2. Commit and push the changes\n3. The banner link will then work!');
+            }, 500);
         }
 
         function clearBanner() {
